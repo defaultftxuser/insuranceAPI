@@ -1,6 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Optional
+from uuid import UUID, uuid4
 
 from src.common.converters.converter import convert_to_int
 from src.domain.entitites.base import (
@@ -89,3 +90,30 @@ class InsuranceEntityWithPrice(BaseEntity):
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }
+
+
+@dataclass(eq=False)
+class InsuranceEntityQuery(BaseEntity):
+    date: Optional[date] = None
+    cargo_type: str | None = None
+    rate: float | int | None = None
+    limit: int = 10
+    offset: int = 0
+
+    def validate(self): ...
+
+    def to_dict(self):
+        return {
+            key: value
+            for key, value in {
+                "date": self.date,
+                "cargo_type": self.cargo_type,
+                "rate": self.rate,
+            }.items()
+            if value is not None
+        }
+
+
+@dataclass(eq=False)
+class DummyUserId:
+    id: UUID = field(default_factory=uuid4)
