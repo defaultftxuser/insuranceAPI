@@ -12,7 +12,7 @@ class BaseEventMediator(ABC):
     )
 
     @abstractmethod
-    async def publish(self, events: ET) -> ER: ...
+    async def publish(self, events: list[ET]) -> ER: ...
 
     @abstractmethod
     async def register_event(

@@ -36,10 +36,11 @@ class Mediator(BaseCommandMediator, BaseEventMediator, BaseQueryMediator):
     async def handle_command(self, command: BaseCommand):
         command_type = command.__class__
         handlers = self.commands_map[command_type]
-        for handler in handlers:
-            return [await handler.handle(command) for handler in handlers]
+        if not handlers:
+            raise
+        return [await handler.handle(command) for handler in handlers]
 
-    async def publish(self, events: ET) -> ER:
+    async def publish(self, events: Iterable[ET]) -> ER:
         result = []
         for event in events:
             handlers: Iterable[BaseEventHandler] = self.events_map[event.__class__]
