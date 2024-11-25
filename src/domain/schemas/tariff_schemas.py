@@ -8,7 +8,7 @@ from src.domain.entitites.tariff_entities import TariffEntityWithConvertRate
 
 class CargoItem(BaseModel):
     cargo_type: str
-    rate: float = Field(gt=0, description="Rate must be greater than 0")
+    rate: float = Field(ge=0.00001, description="Rate must be greater than 0")
 
 
 class CargoRateSchema(RootModel[dict[date, list[CargoItem]]]):
@@ -40,3 +40,4 @@ class TariffItem(CargoItem):
             rate=rate,
             divide_rate_convert=divide_rate_convert,
         )
+
