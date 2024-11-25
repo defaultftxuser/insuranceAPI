@@ -1,11 +1,11 @@
 from sqlalchemy import Column, Date, String, Integer, UniqueConstraint
 
-from src.infra.models.base import BaseModel
+from src.infra.models.base import AbstractModel
 
 
-class InsuranceModel(BaseModel):
+class TariffModel(AbstractModel):
 
-    __tablename__ = "insurances"
+    __tablename__ = "tariffes"
 
     date = Column(Date, nullable=False)
     cargo_type = Column(String, nullable=False)

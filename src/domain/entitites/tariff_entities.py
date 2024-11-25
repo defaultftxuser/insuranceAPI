@@ -10,36 +10,9 @@ from src.domain.entitites.base import (
 
 
 @dataclass(eq=False)
-class InsuranceEntityIn(BaseEntity):
+class TariffEntityInWithoutRate(BaseEntity):
     date: date
     cargo_type: str
-    rate: float
-
-    def validate(self): ...
-
-    def convert_to_int_rate(self):
-        rate, rate_convert = convert_to_int(self.rate)
-        return {
-            "date": self.date,
-            "cargo_type": self.cargo_type,
-            "rate": rate_convert,
-            "divide_rate_convert": rate,
-        }
-
-    def to_dict(self):
-        return {
-            "date": self.date,
-            "cargo_type": self.cargo_type,
-            "rate": self.rate,
-        }
-
-
-@dataclass(eq=False)
-class InsuranceEntityWithPrice(BaseEntity):
-    date: date
-    cargo_type: str
-    rate: float | int
-    price: float | int
 
     def validate(self): ...
 
@@ -47,39 +20,24 @@ class InsuranceEntityWithPrice(BaseEntity):
         return {
             "date": self.date,
             "cargo_type": self.cargo_type,
-            "rate": self.rate,
-            "price": self.price,
         }
 
 
 @dataclass(eq=False)
-class InsuranceEntityWithPrice(BaseEntity):
-    date: date
-    cargo_type: str
-    rate: float | int
-    divide_rate_convert: float | int
-
-    def validate(self): ...
-
-    def to_dict(self):
-        return {
-            "date": self.date,
-            "cargo_type": self.cargo_type,
-            "rate": self.rate,
-            "divide_rate_convert": self.divide_rate_convert,
-        }
-
-
-@dataclass(eq=False)
-class InsuranceEntityWithPrice(BaseEntity):
-    date: date
-    cargo_type: str
+class TariffEntityIn(TariffEntityInWithoutRate):
     rate: int
-    divide_rate_convert: int
-    created_at: datetime
-    updated_at: datetime
 
-    def validate(self): ...
+    def to_dict(self):
+        return {
+            "date": self.date,
+            "cargo_type": self.cargo_type,
+            "rate": self.rate,
+        }
+
+
+@dataclass(eq=False)
+class TariffEntityWithConvertRate(TariffEntityIn):
+    divide_rate_convert: int
 
     def to_dict(self):
         return {
@@ -87,18 +45,14 @@ class InsuranceEntityWithPrice(BaseEntity):
             "cargo_type": self.cargo_type,
             "rate": self.rate,
             "divide_rate_convert": self.divide_rate_convert,
-            "created_at": self.created_at,
-            "updated_at": self.updated_at,
         }
 
 
 @dataclass(eq=False)
-class InsuranceEntityQuery(BaseEntity):
+class BaseTariffEntityQuery(BaseEntity):
     date: Optional[date] = None
     cargo_type: str | None = None
     rate: float | int | None = None
-    limit: int = 10
-    offset: int = 0
 
     def validate(self): ...
 
@@ -115,5 +69,82 @@ class InsuranceEntityQuery(BaseEntity):
 
 
 @dataclass(eq=False)
+class TariffWithPrice(BaseEntity):
+    id: UUID
+    date: date
+    cargo_type: str
+    rate: int
+    divide_rate_convert: int
+    created_at: datetime
+    updated_at: datetime
+
+    def validate(self): ...
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "date": self.date,
+            "cargo_type": self.cargo_type,
+            "rate": self.rate,
+            "divide_rate_convert": self.divide_rate_convert,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+        }
+
+
+@dataclass(eq=False)
+class BaseTariffEntityWithIdQuery(BaseTariffEntityQuery):
+    id: UUID = None
+
+    def validate(self): ...
+
+    def to_dict(self):
+        return {
+            key: value
+            for key, value in {
+                "id": self.id,
+                "date": self.date,
+                "cargo_type": self.cargo_type,
+                "rate": self.rate,
+            }.items()
+            if value is not None
+        }
+
+
+@dataclass(eq=False)
+class TariffEntityQuery(BaseTariffEntityQuery):
+    date: Optional[date] = None
+    cargo_type: str | None = None
+    rate: float | int | None = None
+    limit: int = 10
+    offset: int = 0
+
+    def to_dict(self):
+        return {
+            key: value
+            for key, value in {
+                "date": self.date,
+                "cargo_type": self.cargo_type,
+                "rate": self.rate,
+            }.items()
+            if value is not None
+        }
+
+
+@dataclass(eq=False)
 class DummyUserId:
     id: UUID = field(default_factory=uuid4)
+
+
+@dataclass(eq=False)
+class TariffEntityOut:
+    date: date
+    rate: float
+    cargo_type: str
+
+
+@dataclass(eq=False)
+class InsuranceEntityOut:
+    date: date
+    price: float
+    cargo_type: str

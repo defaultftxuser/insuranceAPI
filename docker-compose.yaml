@@ -1,6 +1,38 @@
-version: "3.8"
-
 services:
+  python-app:
+    build: .
+    container_name: insurance_app
+    env_file:
+      - .env
+    depends_on:
+      - kafka
+      - kafka-ui
+      - zookeeper
+      - postgres
+    restart: on-failure
+    volumes:
+      - .:/app
+    networks:
+      - kafka_network
+    ports:
+      - "8000:8000"
+    command: uvicorn --factory src.api.main:get_app --reload --host 0.0.0.0 --port 8000
+
+  postgres:
+    image: postgres:latest
+    container_name: insurance_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      -   postgres_data:/var/lib/postgresql/data
+    networks:
+      - kafka_network
+    ports:
+      - "${POSTGRES_PORT}:5432"
+
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     container_name: zookeeper
@@ -19,12 +51,12 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092  # Use localhost for local access
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092  # Use localhost for local access
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     ports:
-      - "9092:9092"  # Kafka port for local access
+      - "${KAFKA_PORT}:9092"
     networks:
       - kafka_network
 
@@ -35,7 +67,7 @@ services:
       - kafka
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS: localhost:9092
+      KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "8080:8080"  # Kafka UI port for local access
     networks:
@@ -44,3 +76,7 @@ services:
 networks:
   kafka_network:
     driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

@@ -5,15 +5,18 @@ from typing import Type, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.common.filters.filters import PaginationFilters
-from src.infra.models.base import BaseModel
+from src.infra.models.base import AbstractModel
 
 
 @dataclass(eq=False)
 class BaseSQLRepository(ABC):
-    model: Type[BaseModel]
+    model: Type[AbstractModel]
 
     @abstractmethod
-    async def read(self, session: AsyncSession, data: dict[Any, Any], pagination_filters: PaginationFilters): ...
+    async def read_one(self, session: AsyncSession, data: dict[Any, Any]): ...
+
+    @abstractmethod
+    async def read_many(self, session: AsyncSession, data: dict[Any, Any], limit: int, offset: int): ...
 
     @abstractmethod
     async def create(self, session: AsyncSession, data: dict[Any, Any]): ...
