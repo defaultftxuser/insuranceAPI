@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import Any, AsyncGenerator
 
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     AsyncSession,
@@ -32,4 +33,9 @@ class AsyncPostgresClient(PostgresClient):
     @asynccontextmanager
     async def create_session(self) -> AsyncSession:
         async with self.session_factory() as session:
-            yield session
+            try:
+                yield session
+            except SQLAlchemyError:
+                await session.rollback()
+            finally:
+                await session.close()
